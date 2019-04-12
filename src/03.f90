@@ -16,16 +16,18 @@ program FEM_triangle_element
     integer, dimension(MAXELEM, 3) :: element! 要素を構成する節点番号のリスト
     double precision, dimension(3, 6) :: B ! B matrix
     integer total_element ! 総要素数
-    integer i, j ! dummy index
+    integer i, j, k ! dummy index
 
     call make_model(node, element, total_element)
 
     do i = 1, total_element
         call calc_bmatrix(i, B, node, element)
-        do j = 1,3
-            write(*,*) B(i, 1:6)
-        enddo
-        write(*,*)
+        do j = 1, 3
+            do k = 1, 6
+                write(6, '(f7.3)', advance='no') B(j, k)
+            end do
+        end do
+        write(6, '()')
     end do
     stop
 end program
@@ -47,8 +49,8 @@ subroutine make_model(node, element, total_element)
     ! 厚さ
     ! thick = 1.0d0
     ! 座標の計算
-    do i=1, xsize
-        do j=1, ysize
+    do i = 1, xsize
+        do j = 1, ysize
             ielem = ielem + 1
             node(ielem, 1) = (i - 1) * dx
             node(ielem, 2) = (j - 1) * dy
