@@ -135,6 +135,7 @@ subroutine calc_bmatrix(ielem, B, node, element)
     B(3, 6) = (node(e(1), 2) - node(e(2), 2)) / A
 end subroutine
 
+! Dマトリクスの計算
 subroutine calc_dmatrix(D, props)
     use parameters
     implicit none
