@@ -1,34 +1,31 @@
 FC       = gfortran
+FFLAGS   =
+LDFLAGS  =
+LIBS     =
 INCLUDE  = -I ./include
 MOD_DIR  = -J ./include
 BIN_DIR  = ./bin
 OBJ_DIR  = ./build
 SRC_DIR  = ./src
-SUFFIX = .f90
-SOURCES:=$(wildcard $(SRC_DIR)/*$(SUFFIX))
-OBJECTS:=$(addprefix $(OBJ_DIR)/, $(notdir $(SOURCES:$(SUFFIX)=.o)))
-TARGETS:=$(addprefix $(BIN_DIR)/, $(notdir $(basename $(SOURCES))))
+BIN_LIST = a.out
+SRC_LIST = main.f90 matrix.f90 input.f90 utils.f90
+SRC_LIST = utils.f90 input.f90 matrix.f90 main.f90
+SOURCES  = $(addprefix $(SRC_DIR)/, $(SRC_LIST))
+OBJECTS  = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES:.f90=.o))
+TARGET  = $(addprefix $(BIN_DIR)/, $(BIN_LIST))
+RM       = rm
 
-define OBJECT
-	$(addprefix $(OBJ_DIR)/, $(notdir $(1)).o)
-endef
+all: $(TARGET)
 
-define SOURCE
-	$(addprefix $(SRC_DIR)/, $(notdir $(1))$(SUFFIX))
-endef
+$(TARGET): $(OBJECTS)
+	$(FC) -o $@ $(OBJECTS) $(LDFLAGS)
 
-define MAKEALL
-$(1): $(call OBJECT, $(1))
-	$(FC) -o $(1) $(call OBJECT, $(1))
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.f90
+	$(FC) $(FFLAGS) $(INCLUDE) $(MOD_DIR) -o $@ -c $<
 
-$(addprefix $(OBJ_DIR)/, $(notdir $(1)).o): $(call SOURCE, $(1))
-	$(FC) $(INCLUDE) $(MOD_DIR) -o $(call OBJECT, $(1)) -c $(call SOURCE, $(1))
-endef
+run: $(TARGET)
+	$(TARGET)
 
-.PHONY: all
-all: $(TARGETS)
-$(foreach VAR,$(TARGETS),$(eval $(call MAKEALL,$(VAR))))
-
-.PHONY:clean
+.PHONY: clean
 clean:
-	$(RM) $(OBJECTS) $(TARGETS) ./include/*.mod
+	$(RM) $(OBJECTS) $(TARGET) ./include/*.mod
