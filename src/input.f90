@@ -60,9 +60,33 @@ subroutine make_model(node, element, props, total_element, total_dof)
 
     total_element = ielem - 1 ! 総要素数
 
-    ! 節点リスト出力
-    ! do i = 1, total_element
-    !     write(*,*) element(i, 1:3)
-    ! enddo
+    ! 境界条件の設定
+    ! 変位境界条件（x方向）
+    num = 0      ! 境界条件の番号，インクリメントする
+    idof = 1
+    do j=1,3      ! 左境界の節点を指定する
+        num = num + 1
+        i_bc_given(num) = j ! 節点番号
+        v_bc_given(num) = 0.d0 ! 強制変位量
+        i_bc_given(num) = (i_bc_given(num) - 1) * 2 + idof
+    end do
+
+    ! 変位境界条件（y方向）
+    idof = 2
+    num = num + 1
+    i_bc_given(num) = 1 ! 節点番号
+    v_bc_given(num) = 0.d0 ! 強制変位量
+    i_bc_given(num) = (i_bc_given(num) - 1) * 2 + idof
+
+    n_bc_given = num
+
+    ! 力学的境界条件
+    p(1:ndof) = 0.d0    ! 初期化（力の作用しない自由表面では，節点力はゼロである）
+
+    idof = 2                  ! y方向
+    i_load_given = total_node      ! 節点力を与える節点番号
+    v_load_given = -1d3
+    i_load_given = (i_load_given - 1) * 2 + idof    ! 自由度番号
+    p(i_load_given) = v_load_given
 end subroutine
 end module
