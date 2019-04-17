@@ -8,11 +8,10 @@ BIN_DIR  = ./bin
 OBJ_DIR  = ./build
 SRC_DIR  = ./src
 BIN_LIST = a.out
-SRC_LIST = main.f90 matrix.f90 input.f90 utils.f90
-SRC_LIST = utils.f90 input.f90 matrix.f90 main.f90
+SRC_LIST = main.f90 matrix.f90 input.f90
 SOURCES  = $(addprefix $(SRC_DIR)/, $(SRC_LIST))
 OBJECTS  = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES:.f90=.o))
-TARGET  = $(addprefix $(BIN_DIR)/, $(BIN_LIST))
+TARGET   = $(addprefix $(BIN_DIR)/, $(BIN_LIST))
 RM       = rm
 
 all: $(TARGET)
