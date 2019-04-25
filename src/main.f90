@@ -11,18 +11,19 @@ module utils
         integer, dimension(MAXELEM, 3) :: element       ! 要素を構成する節点番号のリスト
 
         ! モデルのサイズ関係
-        integer total_element       ! 総要素数
-        integer total_dof           ! 総自由度数
+        integer total_element ! 総要素数
+        integer total_dof     ! 総自由度数
+        integer total_node    ! 総節点数
 
         ! 変位境界条件
         integer :: total_bound ! 境界条件の数
         integer, dimension(MAXBC) :: bound_dof ! 変位境界条件を設定する自由度
         integer, dimension(MAXBC) :: bound_val ! 変位境界条件の既知変位の値
 
-        ! 右辺ベクトル(Ax = BのB)
-        double precision, dimension(2*MAXNODE) :: B
-
-        double precision, dimension(2*MAXNODE, 2*MAXNODE) :: Kmat ! 全体剛性マトリクス
+        ! Kmat*X = B
+        double precision, pointer :: Kmat(:,:) ! 全体剛性マトリクス
+        double precision, pointer :: X(:) ! 節点変位ベクトル
+        double precision, pointer :: B(:) ! 右辺ベクトル(Ax = BのB)
 
         ! モデルの物性など
         double precision :: young   ! ヤング率
@@ -37,13 +38,15 @@ program main
     type(modelinfo) mesh
 
     integer i ! dummy index
+
     call input_model_analytical(mesh)
     call calc_kmatrix(mesh)
     call boundary_condition(mesh)
+    call solve(mesh)
+    call output(mesh)
 
-    write(*,*) mesh%B(1:mesh%total_dof)
-    do i = 1, mesh%total_dof
-        write(6, '(E15.7)') mesh%Kmat(i,i)
+    do i = 1, mesh%total_node
+        write(6, *) mesh%X(2*i - 1), mesh%X(2*i)
     end do
     stop
-end program
+end program main

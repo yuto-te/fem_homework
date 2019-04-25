@@ -3,8 +3,8 @@ subroutine calc_bmatrix(ielem, Bmat, area, mesh)
     use utils
     implicit none
     integer ielem ! 要素番号
-    double precision, dimension(3, 6) :: Bmat ! B matrix
-    double precision area ! 理論としては2*Aであることに注意
+    double precision :: Bmat(3, 6) ! B matrix
+    double precision area ! 面積
     type(modelinfo) :: mesh
 
     double precision :: x1, y1, x2, y2, x3, y3
@@ -16,27 +16,27 @@ subroutine calc_bmatrix(ielem, Bmat, area, mesh)
     x3 = mesh%node(mesh%element(ielem, 3), 1)
     y3 = mesh%node(mesh%element(ielem, 3), 2)
 
-    area = x2 * y3 + x1 * y2 + x3 * y1 - x2 * y1 - x3 * y2 - x1 * y3
+    area = (x2 * y3 + x1 * y2 + x3 * y1 - x2 * y1 - x3 * y2 - x1 * y3) / 2
 
-    Bmat(1, 1) = (y2 - y3) / area
-    Bmat(1, 3) = (y3 - y1) / area
-    Bmat(1, 5) = (y1 - y2) / area
-    Bmat(2, 2) = (x3 - x2) / area
-    Bmat(2, 4) = (x1 - x3) / area
-    Bmat(2, 6) = (x2 - x1) / area
-    Bmat(3, 1) = (x3 - x2) / area
-    Bmat(3, 2) = (y2 - y3) / area
-    Bmat(3, 3) = (x1 - x3) / area
-    Bmat(3, 4) = (y3 - y1) / area
-    Bmat(3, 5) = (x2 - x1) / area
-    Bmat(3, 6) = (y1 - y2) / area
-end subroutine
+    Bmat(1, 1) = (y2 - y3) / area / 2
+    Bmat(1, 3) = (y3 - y1) / area / 2
+    Bmat(1, 5) = (y1 - y2) / area / 2
+    Bmat(2, 2) = (x3 - x2) / area / 2
+    Bmat(2, 4) = (x1 - x3) / area / 2
+    Bmat(2, 6) = (x2 - x1) / area / 2
+    Bmat(3, 1) = (x3 - x2) / area / 2
+    Bmat(3, 2) = (y2 - y3) / area / 2
+    Bmat(3, 3) = (x1 - x3) / area / 2
+    Bmat(3, 4) = (y3 - y1) / area / 2
+    Bmat(3, 5) = (x2 - x1) / area / 2
+    Bmat(3, 6) = (y1 - y2) / area / 2
+end subroutine calc_bmatrix
 
 ! Dマトリクスの計算
 subroutine calc_dmatrix(Dmat, mesh)
     use utils
     implicit none
-    double precision, dimension(3, 3) :: Dmat ! D matrix
+    double precision :: Dmat(3, 3) ! D matrix
     type(modelinfo) :: mesh
 
     double precision :: E, nu
@@ -44,49 +44,41 @@ subroutine calc_dmatrix(Dmat, mesh)
     E = mesh%young
     nu = mesh%poisson
 
-    Dmat(1, 1) = E / (1 - nu**2)
-    Dmat(1, 2) = E / (1 - nu**2) * nu
-    Dmat(2, 1) = E / (1 - nu**2) * nu
-    Dmat(2, 2) = E / (1 - nu**2)
+    Dmat(1, 1) = E / (1 + nu) / (1 - 2*nu) * (1 - nu)
+    Dmat(1, 2) = E / (1 + nu) / (1 - 2*nu) * nu
+    Dmat(2, 1) = E / (1 + nu) / (1 - 2*nu) * nu
+    Dmat(2, 2) = E / (1 + nu) / (1 - 2*nu) * (1 - nu)
     Dmat(3, 3) = E / (1 + nu) / 2
-end subroutine
+end subroutine calc_dmatrix
 
 ! 要素剛性マトリクスの計算
-subroutine calc_element_stiff_mat(ielem, mesh, dK, ip)
+subroutine calc_element_stiff_mat(ielem, mesh, dK, correspond)
     use utils
     implicit none
     integer ielem ! 要素番号
     type(modelinfo) :: mesh
-    double precision, dimension(6, 6) :: dK ! 要素剛性マトリクス
-    integer, dimension(6) :: ip ! 要素剛性マトリクスと全体剛性マトリクスの対応関係
+    double precision :: dK(6, 6) ! 要素剛性マトリクス
+    integer :: correspond(6) ! 要素剛性マトリクスと全体剛性マトリクスの対応関係
 
-    double precision, dimension(3, 6) :: Bmat = 0d0 ! B matrix
-    double precision, dimension(3, 3) :: Dmat = 0d0 ! D matrix
-    double precision, dimension(3, 6) :: DB = 0d0 ! D * B
-    double precision area ! 理論としては2*Aであることに注意
-    integer i, j, k ! dummy index
+    double precision :: Bmat(3, 6) = 0d0 ! B matrix
+    double precision :: Dmat(3, 3) = 0d0 ! D matrix
+    double precision area ! 面積
+    integer i, j ! dummy index
 
     call calc_bmatrix(ielem, Bmat, area, mesh)
     call calc_dmatrix(Dmat, mesh)
 
     ! 要素剛性のインデックスと全体剛性のインデックスの対応を付ける
-    ! 全体剛性は対象行列なので片方のインデックスのみ対応すればよい
+    ! 全体剛性は対称行列なので片方のインデックスのみ対応すればよい
     do i = 1, 3
         do j = 1, 2
-            ip((i - 1)*2 + j) = (mesh%element(ielem, i) - 1)*2 + j
+            correspond((i - 1)*2 + j) = (mesh%element(ielem, i) - 1)*2 + j
         end do
     end do
 
-    DB = matmul(Dmat, Bmat)
     ! 要素剛性の計算
-    do i = 1, 6
-        do j = 1, 6
-            do k = 1, 3
-                dK(i, j) = dK(i, j) + Bmat(k, i) * DB(k, j) * area * mesh%thick
-            end do
-        end do
-    end do
-end subroutine
+    dK = matmul(transpose(Bmat), matmul(Dmat, Bmat)) * area * mesh%thick
+end subroutine calc_element_stiff_mat
 
 ! 全体剛性マトリクスの計算
 subroutine calc_kmatrix(mesh)
@@ -94,21 +86,23 @@ subroutine calc_kmatrix(mesh)
     implicit none
     type(modelinfo) :: mesh
 
-    double precision, dimension(6, 6) :: dK = 0d0 ! 要素剛性マトリクス
-    integer, dimension(6) :: ip ! 要素剛性マトリクスと全体剛性マトリクスの対応関係
+    double precision :: dK(6, 6) ! 要素剛性マトリクス
+    integer :: correspond(6) ! 要素剛性マトリクスと全体剛性マトリクスの対応関係
     integer ielem ! 要素番号
     integer i, j  ! dummy index
 
+    mesh%Kmat = 0d0
+
     do ielem = 1, mesh%total_element
-        call calc_element_stiff_mat(ielem, mesh, dK, ip)
+        call calc_element_stiff_mat(ielem, mesh, dK, correspond)
         ! 要素剛性を全体剛性に取り込む
         do i = 1, 6
             do j = 1, 6
-                mesh%Kmat(ip(i), ip(j)) = mesh%Kmat(ip(i), ip(j)) + dK(i, j)
+                mesh%Kmat(correspond(i), correspond(j)) = mesh%Kmat(correspond(i), correspond(j)) + dK(i, j)
             end do
         end do
     end do
-end subroutine
+end subroutine calc_kmatrix
 
 ! 境界条件の適用
 subroutine boundary_condition(mesh)
@@ -142,4 +136,4 @@ subroutine boundary_condition(mesh)
         end do
         mesh%Kmat(idof, idof) = 1d0
     end do
-end subroutine
+end subroutine boundary_condition
