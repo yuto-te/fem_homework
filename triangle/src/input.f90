@@ -72,6 +72,6 @@ subroutine input_model_analytical(mesh)
     mesh%total_bound = ielem ! 境界条件の数
 
     ! 力学的境界条件
-    mesh%B(1:mesh%total_dof) = 0.d0    ! 初期化(力の作用しない自由表面では，節点力はゼロである)
+    mesh%B = 0.d0    ! 初期化(力の作用しない自由表面では，節点力はゼロである)
     mesh%B((mesh%total_node - 1) * 2 + 2) = -1d3
 end subroutine input_model_analytical
