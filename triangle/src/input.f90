@@ -52,6 +52,9 @@ subroutine input_model_analytical(mesh)
 
     mesh%total_element = ielem - 1 ! 総要素数
 
+    ! 配列の領域確保
+    allocate(mesh%stress(mesh%total_element, 3))
+
     ! 境界条件の設定
     ! 変位境界条件(x方向) 左端固定
     ielem = 0 ! 境界条件の番号，インクリメントする

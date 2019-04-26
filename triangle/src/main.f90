@@ -25,6 +25,7 @@ module utils
         double precision, pointer :: X(:) ! 節点変位ベクトル
         double precision, pointer :: B(:) ! 右辺ベクトル(Ax = BのB)
 
+        double precision, pointer :: stress(:,:) ! 応力
         ! モデルの物性など
         double precision :: young   ! ヤング率
         double precision :: poisson ! ポアソン比
@@ -43,10 +44,9 @@ program main
     call calc_kmatrix(mesh)
     call boundary_condition(mesh)
     call solve(mesh)
+    call calc_stress(mesh)
     call output(mesh)
 
-    do i = 1, mesh%total_node
-        write(6, *) mesh%X(2*i - 1), mesh%X(2*i)
-    end do
+    print *, "finish calculation"
     stop
 end program main

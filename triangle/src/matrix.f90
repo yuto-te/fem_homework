@@ -18,6 +18,7 @@ subroutine calc_bmatrix(ielem, Bmat, area, mesh)
 
     area = (x2 * y3 + x1 * y2 + x3 * y1 - x2 * y1 - x3 * y2 - x1 * y3) / 2
 
+    Bmat = 0d0
     Bmat(1, 1) = (y2 - y3) / area / 2
     Bmat(1, 3) = (y3 - y1) / area / 2
     Bmat(1, 5) = (y1 - y2) / area / 2
@@ -44,6 +45,7 @@ subroutine calc_dmatrix(Dmat, mesh)
     E = mesh%young
     nu = mesh%poisson
 
+    Dmat = 0d0
     Dmat(1, 1) = E / (1 + nu) / (1 - 2*nu) * (1 - nu)
     Dmat(1, 2) = E / (1 + nu) / (1 - 2*nu) * nu
     Dmat(2, 1) = E / (1 + nu) / (1 - 2*nu) * nu
@@ -60,8 +62,8 @@ subroutine calc_element_stiff_mat(ielem, mesh, dK, correspond)
     double precision :: dK(6, 6) ! 要素剛性マトリクス
     integer :: correspond(6) ! 要素剛性マトリクスと全体剛性マトリクスの対応関係
 
-    double precision :: Bmat(3, 6) = 0d0 ! B matrix
-    double precision :: Dmat(3, 3) = 0d0 ! D matrix
+    double precision :: Bmat(3, 6) ! B matrix
+    double precision :: Dmat(3, 3) ! D matrix
     double precision area ! 面積
     integer i, j ! dummy index
 
