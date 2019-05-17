@@ -7,7 +7,8 @@ subroutine calc_stress(mesh)
     double precision :: Bmat(3, 8) ! B matrix
     double precision :: Dmat(3, 3) ! D matrix
     double precision :: strain(3) ! strain
-    double precision :: a, b
+    double precision :: Jacobian ! ヤコビアン
+    double precision :: a, b ! ガウス積分点
     integer ielem, i, j, k ! dummy index
 
     call calc_dmatrix(Dmat, mesh)
@@ -16,7 +17,7 @@ subroutine calc_stress(mesh)
     do ielem = 1, mesh%total_element
         do k = 1, 4
             call gauss_node(k, a, b)
-            call calc_bmatrix(ielem, a, b, Bmat, mesh)
+            call calc_bmatrix(ielem, a, b, Bmat, Jacobian, mesh)
             call calc_strain(ielem, Bmat, mesh, strain)
             do i = 1, 3
                 do j = 1, 3
@@ -24,6 +25,8 @@ subroutine calc_stress(mesh)
                 end do
             end do
         end do
+        ! 4つの積分点の応力の算術平均を要素の応力とみなす
+        mesh%stress(ielem, 1:3) = mesh%stress(ielem, 1:3) / 4
     end do
 end subroutine calc_stress
 
@@ -40,7 +43,7 @@ subroutine calc_strain(ielem, Bmat, mesh, strain)
 
     strain = 0d0
     do i = 1, 3
-        do j = 1, 3
+        do j = 1, 4
             n = mesh%element(ielem, j)
             strain(i) = strain(i) + Bmat(i, 2*j - 1) * mesh%X(2*n - 1) + Bmat(i, 2*j) * mesh%X(2*n)
         end do
