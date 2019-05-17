@@ -1,16 +1,17 @@
 ! Bマトリクスの計算
-subroutine calc_bmatrix(ielem, a, b, Bmat, mesh)
+subroutine calc_bmatrix(ielem, a, b, Bmat, Jacobian, mesh)
     use utils
     implicit none
     integer :: ielem ! 要素番号
     double precision :: a, b ! 四角形要素のうち節点の空間座標
     ! (a, b) は4点(-1, -1), (1, -1), (1, 1), (-1, 1)で作られる四角形の内部の座標
     double precision :: Bmat(3, 8) ! B matrix
+    double precision :: Jacobian ! ヤコビアン
     type(modelinfo) :: mesh
 
     double precision :: x1, y1, x2, y2, x3, y3, x4, y4
     double precision :: dN1da, dN2da, dN3da, dN4da, dN1db, dN2db, dN3db, dN4db ! 形状関数の微分
-    double precision :: J11, J12, J21, J22, Jacobian ! ヤコビ行列，ヤコビアン
+    double precision :: J11, J12, J21, J22 ! ヤコビ行列
 
     x1 = mesh%node(mesh%element(ielem, 1), 1)
     y1 = mesh%node(mesh%element(ielem, 1), 2)
@@ -86,6 +87,7 @@ subroutine calc_element_stiff_mat(ielem, mesh, dK, correspond)
 
     double precision :: Bmat(3, 8) ! B matrix
     double precision :: Dmat(3, 3) ! D matrix
+    double precision :: Jacobian ! ヤコビアン
     integer i, j ! dummy index
     double precision :: a, b ! ガウス積分点
 
@@ -102,8 +104,8 @@ subroutine calc_element_stiff_mat(ielem, mesh, dK, correspond)
     call calc_dmatrix(Dmat, mesh)
     do i = 1, 4
         call gauss_node(i, a, b)
-        call calc_bmatrix(ielem, a, b, Bmat, mesh)
-        dK = dK + matmul(transpose(Bmat), matmul(Dmat, Bmat)) * mesh%thick
+        call calc_bmatrix(ielem, a, b, Bmat, Jacobian, mesh)
+        dK = dK + matmul(transpose(Bmat), matmul(Dmat, Bmat)) * mesh%thick * Jacobian
     end do
 end subroutine calc_element_stiff_mat
 
