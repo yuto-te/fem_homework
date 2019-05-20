@@ -38,8 +38,6 @@ program main
     implicit none
     type(modelinfo) mesh
 
-    integer i ! dummy index
-
     call input_model_analytical(mesh)
     call calc_kmatrix(mesh)
     call boundary_condition(mesh)
