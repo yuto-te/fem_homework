@@ -2,16 +2,16 @@
 subroutine calc_bmatrix(ielem, a, b, Bmat, Jacobian, mesh)
     use utils
     implicit none
-    integer :: ielem ! 要素番号
-    double precision :: a, b ! 四角形要素のうち節点の空間座標
+    integer(kint) :: ielem ! 要素番号
+    real(kreal) :: a, b ! 四角形要素のうち節点の空間座標
     ! (a, b) は4点(-1, -1), (1, -1), (1, 1), (-1, 1)で作られる四角形の内部の座標
-    double precision :: Bmat(3, 8) ! B matrix
-    double precision :: Jacobian ! ヤコビアン
+    real(kreal) :: Bmat(3, 8) ! B matrix
+    real(kreal) :: Jacobian ! ヤコビアン
     type(modelinfo) :: mesh
 
-    double precision :: x1, y1, x2, y2, x3, y3, x4, y4
-    double precision :: dN1da, dN2da, dN3da, dN4da, dN1db, dN2db, dN3db, dN4db ! 形状関数の微分
-    double precision :: J11, J12, J21, J22 ! ヤコビ行列
+    real(kreal) :: x1, y1, x2, y2, x3, y3, x4, y4
+    real(kreal) :: dN1da, dN2da, dN3da, dN4da, dN1db, dN2db, dN3db, dN4db ! 形状関数の微分
+    real(kreal) :: J11, J12, J21, J22 ! ヤコビ行列
 
     x1 = mesh%node(mesh%element(ielem, 1), 1)
     y1 = mesh%node(mesh%element(ielem, 1), 2)
@@ -60,10 +60,10 @@ end subroutine calc_bmatrix
 subroutine calc_dmatrix(Dmat, mesh)
     use utils
     implicit none
-    double precision :: Dmat(3, 3) ! D matrix
+    real(kreal) :: Dmat(3, 3) ! D matrix
     type(modelinfo) :: mesh
 
-    double precision :: E, nu
+    real(kreal) :: E, nu
 
     E = mesh%young
     nu = mesh%poisson
@@ -80,16 +80,16 @@ end subroutine calc_dmatrix
 subroutine calc_element_stiff_mat(ielem, mesh, dK, correspond)
     use utils
     implicit none
-    integer ielem ! 要素番号
+    integer(kint) :: ielem ! 要素番号
     type(modelinfo) :: mesh
-    double precision :: dK(8, 8) ! 要素剛性マトリクス
-    integer :: correspond(8) ! 要素剛性マトリクスと全体剛性マトリクスの対応関係
+    real(kreal) :: dK(8, 8) ! 要素剛性マトリクス
+    integer(kint) :: correspond(8) ! 要素剛性マトリクスと全体剛性マトリクスの対応関係
 
-    double precision :: Bmat(3, 8) ! B matrix
-    double precision :: Dmat(3, 3) ! D matrix
-    double precision :: Jacobian ! ヤコビアン
-    integer i, j ! dummy index
-    double precision :: a, b ! ガウス積分点
+    real(kreal) :: Bmat(3, 8) ! B matrix
+    real(kreal) :: Dmat(3, 3) ! D matrix
+    real(kreal) :: Jacobian ! ヤコビアン
+    integer(kint) i, j ! dummy index
+    real(kreal) :: a, b ! ガウス積分点
 
     ! 要素剛性のインデックスと全体剛性のインデックスの対応を付ける
     ! 全体剛性は対称行列なので片方のインデックスのみ対応すればよい
@@ -111,9 +111,10 @@ end subroutine calc_element_stiff_mat
 
 ! ガウス積分点
 subroutine gauss_node(i, a, b)
+    use utils
     implicit none
-    integer :: i ! 四角形のローカルな節点番号
-    double precision :: a, b ! ガウス積分点
+    integer(kint) :: i ! 四角形のローカルな節点番号
+    real(kreal) :: a, b ! ガウス積分点
     if (i == 1) then
         a = - (1d0 / 3)**0.5
         b = - (1d0 / 3)**0.5
@@ -138,10 +139,10 @@ subroutine calc_kmatrix(mesh)
     implicit none
     type(modelinfo) :: mesh
 
-    double precision :: dK(8, 8) ! 要素剛性マトリクス
-    integer :: correspond(8) ! 要素剛性マトリクスと全体剛性マトリクスの対応関係
-    integer ielem ! 要素番号
-    integer i, j  ! dummy index
+    real(kreal) :: dK(8, 8) ! 要素剛性マトリクス
+    integer(kint) :: correspond(8) ! 要素剛性マトリクスと全体剛性マトリクスの対応関係
+    integer(kint) :: ielem ! 要素番号
+    integer(kint) :: i, j  ! dummy index
 
     mesh%Kmat = 0d0
 
@@ -162,8 +163,8 @@ subroutine boundary_condition(mesh)
     implicit none
     type(modelinfo) :: mesh
 
-    integer idof ! 自由度番号
-    integer i, j ! dummy index
+    integer(kint) :: idof ! 自由度番号
+    integer(kint) :: i, j ! dummy index
 
     ! 右辺ベクトルに境界にあたる部分を移項する
     do i = 1, mesh%total_bound

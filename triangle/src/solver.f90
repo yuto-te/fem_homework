@@ -7,13 +7,14 @@ subroutine solve(mesh)
 end subroutine solve
 
 subroutine LDU(N, Ain, x, b)
+    use utils
     implicit none
-    integer N ! 行列のサイズ(正方行列)
-    double precision :: Ain(N, N), x(N), b(N)
+    integer(kint) :: N ! 行列のサイズ(正方行列)
+    real(kreal) :: Ain(N, N), x(N), b(N)
 
-    double precision :: A(N, N)
-    double precision sum_u, sum_l, sum_d, tmp
-    integer i, j, k ! dummy index
+    real(kreal) :: A(N, N)
+    real(kreal) :: sum_u, sum_l, sum_d, tmp
+    integer(kint) :: i, j, k ! dummy index
 
     do i = 1, N
         do j = 1, N

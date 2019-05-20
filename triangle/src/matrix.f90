@@ -2,12 +2,12 @@
 subroutine calc_bmatrix(ielem, Bmat, area, mesh)
     use utils
     implicit none
-    integer ielem ! 要素番号
-    double precision :: Bmat(3, 6) ! B matrix
-    double precision area ! 面積
+    integer(kint) :: ielem ! 要素番号
+    real(kreal) :: Bmat(3, 6) ! B matrix
+    real(kreal) :: area ! 面積
     type(modelinfo) :: mesh
 
-    double precision :: x1, y1, x2, y2, x3, y3
+    real(kreal) :: x1, y1, x2, y2, x3, y3
 
     x1 = mesh%node(mesh%element(ielem, 1), 1)
     y1 = mesh%node(mesh%element(ielem, 1), 2)
@@ -37,10 +37,10 @@ end subroutine calc_bmatrix
 subroutine calc_dmatrix(Dmat, mesh)
     use utils
     implicit none
-    double precision :: Dmat(3, 3) ! D matrix
+    real(kreal) :: Dmat(3, 3) ! D matrix
     type(modelinfo) :: mesh
 
-    double precision :: E, nu
+    real(kreal) :: E, nu
 
     E = mesh%young
     nu = mesh%poisson
@@ -57,15 +57,15 @@ end subroutine calc_dmatrix
 subroutine calc_element_stiff_mat(ielem, mesh, dK, correspond)
     use utils
     implicit none
-    integer ielem ! 要素番号
+    integer(kint) :: ielem ! 要素番号
     type(modelinfo) :: mesh
-    double precision :: dK(6, 6) ! 要素剛性マトリクス
-    integer :: correspond(6) ! 要素剛性マトリクスと全体剛性マトリクスの対応関係
+    real(kreal) :: dK(6, 6) ! 要素剛性マトリクス
+    integer(kint) :: correspond(6) ! 要素剛性マトリクスと全体剛性マトリクスの対応関係
 
-    double precision :: Bmat(3, 6) ! B matrix
-    double precision :: Dmat(3, 3) ! D matrix
-    double precision area ! 面積
-    integer i, j ! dummy index
+    real(kreal) :: Bmat(3, 6) ! B matrix
+    real(kreal) :: Dmat(3, 3) ! D matrix
+    real(kreal) :: area ! 面積
+    integer(kint) :: i, j ! dummy index
 
     call calc_bmatrix(ielem, Bmat, area, mesh)
     call calc_dmatrix(Dmat, mesh)
@@ -88,10 +88,10 @@ subroutine calc_kmatrix(mesh)
     implicit none
     type(modelinfo) :: mesh
 
-    double precision :: dK(6, 6) ! 要素剛性マトリクス
-    integer :: correspond(6) ! 要素剛性マトリクスと全体剛性マトリクスの対応関係
-    integer ielem ! 要素番号
-    integer i, j  ! dummy index
+    real(kreal) :: dK(6, 6) ! 要素剛性マトリクス
+    integer(kint) :: correspond(6) ! 要素剛性マトリクスと全体剛性マトリクスの対応関係
+    integer(kint) :: ielem ! 要素番号
+    integer(kint) :: i, j  ! dummy index
 
     mesh%Kmat = 0d0
 
@@ -112,8 +112,8 @@ subroutine boundary_condition(mesh)
     implicit none
     type(modelinfo) :: mesh
 
-    integer idof ! 自由度番号
-    integer i, j ! dummy index
+    integer(kint) :: idof ! 自由度番号
+    integer(kint) :: i, j ! dummy index
 
     ! 右辺ベクトルに境界にあたる部分を移項する
     do i = 1, mesh%total_bound

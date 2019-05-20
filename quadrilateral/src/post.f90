@@ -2,14 +2,14 @@
 subroutine calc_stress(mesh)
     use utils
     implicit none
-    type(modelinfo) mesh
+    type(modelinfo) :: mesh
 
-    double precision :: Bmat(3, 8) ! B matrix
-    double precision :: Dmat(3, 3) ! D matrix
-    double precision :: strain(3) ! strain
-    double precision :: Jacobian ! ヤコビアン
-    double precision :: a, b ! ガウス積分点
-    integer ielem, i, j, k ! dummy index
+    real(kreal) :: Bmat(3, 8) ! B matrix
+    real(kreal) :: Dmat(3, 3) ! D matrix
+    real(kreal) :: strain(3) ! strain
+    real(kreal) :: Jacobian ! ヤコビアン
+    real(kreal) :: a, b ! ガウス積分点
+    integer(kint) :: ielem, i, j, k ! dummy index
 
     call calc_dmatrix(Dmat, mesh)
 
@@ -34,12 +34,12 @@ end subroutine calc_stress
 subroutine calc_strain(ielem, Bmat, mesh, strain)
     use utils
     implicit none
-    integer ielem ! 要素番号
-    double precision :: Bmat(3, 8) ! B matrix
-    type(modelinfo) mesh
-    double precision :: strain(3)
+    integer(kint) :: ielem ! 要素番号
+    real(kreal) :: Bmat(3, 8) ! B matrix
+    type(modelinfo) :: mesh
+    real(kreal) :: strain(3)
 
-    integer i, j, n ! dummy index
+    integer(kint) :: i, j, n ! dummy index
 
     strain = 0d0
     do i = 1, 3
@@ -54,9 +54,9 @@ end subroutine calc_strain
 subroutine output(mesh)
     use utils
     implicit none
-    type(modelinfo) mesh
+    type(modelinfo) :: mesh
 
-    integer i ! dummy index
+    integer(kint) :: i ! dummy index
 
     call system("rm -rf ./result/*.txt")
 

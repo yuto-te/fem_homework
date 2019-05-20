@@ -4,11 +4,11 @@
 subroutine input_model_analytical(mesh)
     use utils
     implicit none
-    type(modelinfo) mesh
+    type(modelinfo) :: mesh
 
-    double precision, parameter :: dx = 2.0d0, dy = 0.5d0 ! 要素の辺の長さ
-    integer, parameter :: xsize = 5, ysize = 3 ! x, y方向の要素数
-    integer :: i, j, ielem = 0 ! dummy index
+    real(kreal), parameter :: dx = 2.0d0, dy = 0.5d0 ! 要素の辺の長さ
+    integer(kint), parameter :: xsize = 5, ysize = 3 ! x, y方向の要素数
+    integer(kint) :: i, j, ielem = 0 ! dummy index
 
     ! 材料特性
     mesh%young = 206d9
